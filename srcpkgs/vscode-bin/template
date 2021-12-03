@@ -1,0 +1,53 @@
+pkgname=vscode-bin
+version=1.62.3
+revision=1
+only_for_archs="x86_64"
+homepage="https://code.visualstudio.com"
+depends="libXtst libxkbfile nss xdg-utils "
+shlib_requires="libvulkan.so.1"
+makedepends="wget tar xz"
+short_desc="Editor for building and debugging modern web and cloud applications"
+license="microsoft"
+nostrip=yes
+noverifyrdeps=yes
+
+do_fetch() {
+    mkdir ${wrksrc}
+    wget -O ${wrksrc}/code.tar.gz "https://update.code.visualstudio.com/${version}/linux-x64/stable"
+}
+
+do_extract() {
+    tar -xf ${wrksrc}/code.tar.gz
+
+    cat << EOF > ${wrksrc}/VSCode-linux-x64/resources/app/resources/linux/code.desktop
+[Desktop Entry]
+Name=Visual Studio Code
+Comment=Code Editing. Refined.
+GenericName=Text Editor
+Exec=/opt/visual-studio-code/bin/code --no-sandbox --unity-launch %F
+Icon=code
+Type=Application
+StartupNotify=false
+StartupWMClass=Code
+Categories=Utility;TextEditor;Development;IDE;
+MimeType=text/plain;inode/directory;application/x-visual-studio-code-workspace;x-scheme-handler/vscode
+Actions=new-empty-window;
+Keywords=vscode;
+
+[Desktop Action new-empty-window]
+Name=New Empty Window
+Exec=/opt/visual-studio-code/bin/code --no-sandbox --new-window %F
+Icon=visual-studio-code
+EOF
+}
+
+do_install() {
+    vmkdir opt/visual-studio-code
+    vcopy VSCode-linux-x64/* opt/visual-studio-code/
+    vmkdir usr/bin
+    ln -sf /opt/visual-studio-code/bin/code ${DESTDIR}/usr/bin/
+    vmkdir usr/share/applications
+    ln -sf /opt/visual-studio-code/resources/app/resources/linux/code.desktop ${DESTDIR}/usr/share/applications/code.desktop
+    vmkdir usr/share/pixmaps
+    ln -sf /opt/visual-studio-code/resources/app/resources/linux/code.png ${DESTDIR}/usr/share/pixmaps/code.png
+}
