@@ -1,0 +1,48 @@
+pkgname=1password-bin
+version=8.4.1
+revision=1
+license="1password"
+only_for_archs="x86_64"
+homepage="https://1password.com"
+makedepends="wget tar xz"
+short_desc="The world’s most-loved password manager"
+nostrip=yes
+noverifyrdeps=yes
+
+do_fetch() {
+    wget "https://downloads.1password.com/linux/tar/stable/x86_64/1password-latest.tar.gz"
+    wget "https://downloads.1password.com/linux/tar/stable/x86_64/1password-latest.tar.gz.sig"
+    pwd
+}
+
+do_extract() {
+    pwd
+    tar -xf ../1password-latest.tar.gz
+}
+
+do_install() {
+    cd 1password-*
+    HELPER_PATH="./1Password-KeyringHelper"
+    BROWSER_SUPPORT_PATH="./1Password-BrowserSupport"
+
+    chmod ug+s $HELPER_PATH
+    chmod g+s $BROWSER_SUPPORT_PATH
+
+    vmkdir opt/1Password
+    chmod 4755 ./chrome-sandbox
+    vcopy ./* opt/1Password
+    vmkdir usr/share/polkit-1/actions
+    vcopy ./com.1password.1Password.policy usr/share/polkit-1/actions/
+    vmkdir usr/share/doc/1password/examples
+    vcopy ./resources/custom_allowed_browsers usr/share/doc/1password/examples/
+    vmkdir usr/share/applications
+    vcopy ./resources/1password.desktop usr/share/applications/
+    vcopy ./resources/icons usr/share/
+    ln -sf /opt/1Password/1password /usr/bin/1password
+    #vmkdir usr/bin
+    #ln -sf /opt/visual-studio-code/bin/code ${DESTDIR}/usr/bin/
+    #vmkdir usr/share/applications
+    #ln -sf /opt/visual-studio-code/resources/app/resources/linux/code.desktop ${DESTDIR}/usr/share/applications/code.desktop
+    #vmkdir usr/share/pixmaps
+    #ln -sf /opt/visual-studio-code/resources/app/resources/linux/code.png ${DESTDIR}/usr/share/pixmaps/code.png
+}
